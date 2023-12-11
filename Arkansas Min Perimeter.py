@@ -7,23 +7,23 @@
 from gerrychain import Graph
 
 
-# In[4]:
+# In[2]:
 
 
-filepath = r'C:\Users\aliaz\OneDrive\Desktop\Progress\Courses\Fall2023\OR\Final Project/'
+filepath = r'C:\Users\aazizide\OneDrive - Texas Tech University\Desktop\Courses\3- Principles of Operations Research\Project\Districting-OR-main\Districting-OR-main/'
 filename= 'AR_county.json'
 
 G = Graph.from_json(filepath + filename)
 
 
-# In[5]:
+# In[3]:
 
 
 for node in G.nodes:
     G.nodes[node]['TOTPOP'] = G.nodes[node]['P0010001']
 
 
-# In[6]:
+# In[4]:
 
 
 dev = 0.01
@@ -37,7 +37,7 @@ U = math.floor((1+dev/2)*tot_pop/k)
 print("Using L =",L,"and U =",U,"and k =",k)
 
 
-# In[7]:
+# In[5]:
 
 
 import gurobipy as gp
@@ -51,13 +51,13 @@ x = m.addVars(G.nodes, k, vtype=GRB.BINARY) # x[i,j] equals one when county i is
 y = m.addVars(G.edges, vtype=GRB.BINARY)    # y[u,v] equals one when edge {u,v} is cut
 
 
-# In[8]:
+# In[6]:
 
 
 m.setObjective( gp.quicksum( G.edges[u,v]['shared_perim'] * y[u,v] for u,v in G.edges ), GRB.MINIMIZE )
 
 
-# In[9]:
+# In[7]:
 
 
 m.addConstrs( gp.quicksum( x[i,j] for j in range(k)) == 1 for i in G.nodes )
@@ -72,7 +72,7 @@ m.addConstrs( x[u,j] - x[v,j] <= y[u,v] for u,v in G.edges for j in range(k) )
 m.update()
 
 
-# In[10]:
+# In[8]:
 
 
 # Add root variables: r[i,j] equals 1 if node i is the "root" of district j
@@ -93,7 +93,7 @@ DG = nx.DiGraph(G)      # directed version of G
 f = m.addVars( DG.edges )
 
 
-# In[11]:
+# In[9]:
 
 
 # The big-M proposed by Hojny et al.
@@ -116,16 +116,16 @@ m.addConstrs( f[i,j] + f[j,i] <= M * ( 1 - y[i,j] ) for i,j in G.edges )
 m.update()
 
 
-# In[22]:
+# In[10]:
 
 
 m.optimize()
 
 
-# In[24]:
+# In[11]:
 
 
-print("The number of cut edges is", m.ObjVal)
+print("The number of cut edges is",m.objval)
 
 districts = [[i for i in G.nodes if x[i,j].x > 0.5] for j in range(k)]
 district_counties = [[G.nodes[i]["NAME20"] for i in districts[j] ] for j in range(k)]
@@ -136,17 +136,17 @@ for j in range(k):
     print("")
 
 
-# In[28]:
+# In[14]:
 
 
 import geopandas as gpd
 
-filepath = r'C:\Users\aliaz\OneDrive\Desktop\Progress\Courses\Fall2023\OR\Final Project/'
+filepath = r'C:\Users\aazizide\OneDrive - Texas Tech University\Desktop\Courses\3- Principles of Operations Research\Project\Districting-OR-main\Districting-OR-main/'
 filename = 'AR_county.shp'
 df = gpd.read_file( filepath + filename)
 
 
-# In[29]:
+# In[15]:
 
 
 assignment = [ -1 for i in G.nodes ]

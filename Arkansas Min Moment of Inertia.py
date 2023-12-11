@@ -12,11 +12,11 @@ from geopy.distance import geodesic
 import geopandas as gpd
 
 
-# In[5]:
+# In[4]:
 
 
 #Set filepath and filename equal to the path/name of the data used respectively
-filepath = r'C:\Users\aliaz\OneDrive\Desktop\Progress\Courses\Fall2023\OR\Final Project/'
+filepath = r'C:\Users\aazizide\OneDrive - Texas Tech University\Desktop\Courses\3- Principles of Operations Research\Project\Districting-OR-main\Districting-OR-main/'
 filename= 'AR_county.json'
 
 #Create a new Graph object G from the file
@@ -29,7 +29,7 @@ for node in G.nodes:
     G.nodes[node]['C_Y'] = G.nodes[node]['INTPTLAT20']
 
 
-# In[6]:
+# In[5]:
 
 
 # create distance dictionary
@@ -41,7 +41,7 @@ for i in G.nodes:
         dist[i,j] = geodesic(loc_i,loc_j).miles
 
 
-# In[7]:
+# In[6]:
 
 
 dev = 0.01
@@ -55,7 +55,7 @@ U = math.floor((1+dev/2)*tot_pop/k)
 print("Using L =",L,"and U =",U,"and k =",k)
 
 
-# In[8]:
+# In[7]:
 
 
 m = gp.Model()
@@ -63,13 +63,13 @@ m = gp.Model()
 x = m.addVars(G.nodes, G.nodes, vtype=GRB.BINARY)
 
 
-# In[9]:
+# In[8]:
 
 
 m.setObjective( gp.quicksum( dist[i,j] * dist[i,j] * G.nodes[i]['TOTPOP'] * x[i,j] for i in G.nodes for j in G.nodes ), GRB.MINIMIZE )
 
 
-# In[10]:
+# In[9]:
 
 
 # add constraints saying that each county i is assigned to one district
@@ -88,7 +88,7 @@ m.addConstrs( x[i,j] <= x[j,j] for i in G.nodes for j in G.nodes )
 m.update()
 
 
-# In[11]:
+# In[10]:
 
 
 # add contiguity constraints
@@ -114,7 +114,7 @@ m.addConstrs( gp.quicksum( f[u,j,j] for u in G.neighbors(j) ) == 0 for j in G.no
 m.update()
 
 
-# In[14]:
+# In[11]:
 
 
 m.Params.MIPGap = 0.0
@@ -122,11 +122,11 @@ m.Params.MIPGap = 0.0
 m.optimize()
 
 
-# In[15]:
+# In[13]:
 
 
 # print the objective value
-print(m.ObjVal)
+print(m.objVal)
 
 # retrieve the districts and their populations
 #    but first get the district "centers"
@@ -143,15 +143,15 @@ for j in range(k):
     print("")
 
 
-# In[29]:
+# In[15]:
 
 
-filepath = 'C:/Users/Logan/Desktop\College/IEM4013Project/'
+filepath = r'C:\Users\aazizide\OneDrive - Texas Tech University\Desktop\Courses\3- Principles of Operations Research\Project\Districting-OR-main\Districting-OR-main/'
 filename = 'AR_county.shp'
 df = gpd.read_file( filepath + filename)
 
 
-# In[30]:
+# In[16]:
 
 
 # Which district is each county assigned to?

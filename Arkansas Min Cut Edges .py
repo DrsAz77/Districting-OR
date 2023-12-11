@@ -13,17 +13,17 @@ import geopandas as gpd
 import math
 
 
-# In[9]:
+# In[3]:
 
 
 #Set filepath and filename equal to the path/name of the data used respectively
-filepath = r'C:\Users\aliaz\Downloads\IEM40132020RedistrictingProject-main\IEM40132020RedistrictingProject-main/'
+filepath = r'C:\Users\aazizide\OneDrive - Texas Tech University\Desktop\Courses\3- Principles of Operations Research\Project\Districting-OR-main\Districting-OR-main/'
 filename= 'AR_county.json'
 #Create a new Graph object G from the file
 G = Graph.from_json(filepath + filename)
 
 
-# In[10]:
+# In[4]:
 
 
 #Set each node in G to be equal to the population of their respective county
@@ -31,7 +31,7 @@ for node in G.nodes:
     G.nodes[node]['TOTPOP'] = G.nodes[node]['P0010001']
 
 
-# In[117]:
+# In[6]:
 
 
 #Print each node, the county it represents, and their 2020 population
@@ -41,14 +41,14 @@ for node in G.nodes:
     print("Node",node,"represents",name,"County with 2020 population of",population)
 
 
-# In[11]:
+# In[7]:
 
 
 #draw the graph of nodes
 nx.draw(G, with_labels=True)
 
 
-# In[12]:
+# In[8]:
 
 
 #set the ceiling and floor of the model equal to the maximum deviation/2 * the average population
@@ -62,7 +62,7 @@ U = math.floor((1+dev/2)*tot_pop/k)
 print("Using L =",L,"and U =",U,"and k =",k)
 
 
-# In[13]:
+# In[9]:
 
 
 #create a new model object and create variables
@@ -72,14 +72,14 @@ x = m.addVars(G.nodes, k, vtype=GRB.BINARY)
 y = m.addVars(G.edges, vtype=GRB.BINARY)
 
 
-# In[14]:
+# In[10]:
 
 
 #set objective to minimize cut edges
 m.setObjective( gp.quicksum( y[u,v] for u,v in G.edges ), GRB.MINIMIZE )
 
 
-# In[15]:
+# In[11]:
 
 
 # each county i is assigned to a district j
@@ -92,7 +92,7 @@ m.addConstrs( x[u,j] - x[v,j] <= y[u,v] for u,v in G.edges for j in range(k))
 m.update()
 
 
-# In[16]:
+# In[12]:
 
 
 # add root variables: r[i,j] equals 1 if node i is the root of district j
@@ -105,7 +105,7 @@ DG = nx.DiGraph(G)
 f = m.addVars(DG.edges)
 
 
-# In[17]:
+# In[13]:
 
 
 # The big-M proposed by Hojny et al.
@@ -124,17 +124,17 @@ m.addConstrs( f[i,j] + f[j,i] <= M * (1-y[i,j] )for i,j in G.edges)
 m.update()
 
 
-# In[18]:
+# In[17]:
 
 
 # sole IP model
 m.optimize()
 
 
-# In[19]:
+# In[18]:
 
 
-print("The number of cut edges is",m.objval)
+print("The number of cut edges is", m.ObjVal )
 
 # retrieve the districts and their population
 districts = [[i for i in G.nodes if x[i,j].x > 0.5] for j in range(k)]
@@ -149,8 +149,8 @@ for j in range(k):
 # In[20]:
 
 
-# Read Arkansas county shapefile from "AR_county.shp"
-filepath = r'C:\Users\aliaz\Downloads\IEM40132020RedistrictingProject-main\IEM40132020RedistrictingProject-main/'
+# Read Oklahoma county shapefile from "OK_county.shp"
+filepath = r'C:\Users\aazizide\OneDrive - Texas Tech University\Desktop\Courses\3- Principles of Operations Research\Project\Districting-OR-main\Districting-OR-main/'
 filename = 'AR_county.shp'
 # Read geopandas dataframe from file
 df = gpd.read_file( filepath + filename)
